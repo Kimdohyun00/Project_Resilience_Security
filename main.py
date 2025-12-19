@@ -89,7 +89,7 @@ def get_drug_consultation(req: DrugConsultRequest):
 
 
 # ==========================================
-# 3. [핵심] 성과 측정 (검정용)
+# 3. [핵심] 성과 측정 (검정용 - V1)
 # ==========================================
 class DecisionLog(BaseModel):
     session_id: str
@@ -101,3 +101,24 @@ def submit_result(log: DecisionLog):
     # 나중에 이 로그들이 쌓이면 '검정'을 할 수 있습니다.
     print(f"✅ [검정 데이터 확보] 세션: {log.session_id} | 시간: {log.time_taken_sec}초 | 처방: {log.action_taken}")
     return {"msg": "저장 완료"}
+
+
+# ==========================================
+# 4. [추가 기능] 행동 로그 실시간 저장 (V2 대비용)
+# 팀원이 아직 연동 안 했으면 실행 안 됨 (에러 안 남)
+# ==========================================
+
+class ActionLog(BaseModel):
+    session_id: str      # 누구인지
+    step_name: str       # 뭘 눌렀는지 (예: "산소 공급 체크박스")
+    timestamp: Optional[str] = None # 시간 (없으면 서버 시간 사용)
+
+@app.post("/log_checkbox")
+def log_checkbox_click(log: ActionLog):
+    # 현재 시간 구하기
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # 터미널에 로그 찍어보기 (제대로 작동하는지 확인용)
+    print(f"📡 [V2_Log] 세션:{log.session_id} | 행동:{log.step_name} | 시간:{current_time}")
+    
+    return {"status": "logged", "time": current_time}
